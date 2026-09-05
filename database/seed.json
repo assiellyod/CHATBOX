@@ -1,6 +1,14 @@
 {
   "users": [
     {
+      "id": "usr_practice",
+      "displayName": "You",
+      "email": "practice@chatbox.demo",
+      "passwordHash": null,
+      "demo": true,
+      "createdAt": "2026-09-05T00:00:00.000Z"
+    },
+    {
       "id": "usr_alex",
       "displayName": "Alex",
       "email": "alex@chatbox.demo",
