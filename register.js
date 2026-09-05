@@ -36,7 +36,7 @@ form?.addEventListener('submit', async (event) => {
       email: data.get('email')
     });
 
-    showStatus(`${user.displayName} was registered successfully.`, 'success');
+    showStatus(`${user.displayName} is registered and signed in.`, 'success');
     form.reset();
 
     window.setTimeout(() => {
@@ -46,7 +46,7 @@ form?.addEventListener('submit', async (event) => {
     showStatus(error.message || 'Unable to register user.', 'danger');
   } finally {
     submitButton.disabled = false;
-    submitButton.textContent = 'Register user';
+    submitButton.textContent = 'Register and continue';
   }
 });
 
