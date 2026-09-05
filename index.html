@@ -6,10 +6,10 @@
   <meta name="theme-color" content="#4f46e5">
   <meta name="description" content="CHATBOX private messaging interface">
   <title>CHATBOX — Private Messaging</title>
-  <script>
-    tailwind = { config: { darkMode: 'class' } };
-  </script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
 </head>
 <body class="h-full overflow-hidden bg-slate-100 text-slate-900 antialiased dark:bg-slate-950 dark:text-white">
   <div class="flex h-screen w-full">
@@ -102,9 +102,9 @@
           </svg>
         </button>
 
-        <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-slate-200 font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300">—</div>
+        <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-slate-200 font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300" data-active-avatar>—</div>
         <div class="min-w-0">
-          <h2 class="truncate text-sm font-semibold sm:text-base">No conversation selected</h2>
+          <h2 class="truncate text-sm font-semibold sm:text-base" data-active-name>No conversation selected</h2>
           <p class="truncate text-xs text-slate-500 dark:text-slate-400">Choose a user when contacts are available</p>
         </div>
       </header>
