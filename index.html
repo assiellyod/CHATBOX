@@ -43,22 +43,11 @@
         <input type="search" placeholder="Search conversations" data-search autocomplete="off">
       </label>
 
-      <div class="conversation-list">
-        <button class="conversation active" type="button" data-name="Alex" data-avatar="A" data-user-id="usr_alex">
-          <span class="avatar">A</span>
-          <span class="conversation-info">
-            <strong>Alex</strong>
-            <small>Start a conversation</small>
-          </span>
-        </button>
-
-        <button class="conversation" type="button" data-name="Jamie" data-avatar="J" data-user-id="usr_jamie">
-          <span class="avatar">J</span>
-          <span class="conversation-info">
-            <strong>Jamie</strong>
-            <small>No messages yet</small>
-          </span>
-        </button>
+      <div class="conversation-list" data-conversation-list>
+        <div class="empty-state" style="padding:24px 16px;min-height:auto;">
+          <strong>No conversations yet</strong>
+          <small style="display:block;margin-top:6px;">Real users can be added later.</small>
+        </div>
       </div>
     </aside>
 
@@ -72,10 +61,10 @@
               <path d="M4 7h16M4 12h16M4 17h16"/>
             </svg>
           </button>
-          <div class="avatar header-avatar" data-active-avatar>A</div>
+          <div class="avatar header-avatar" data-active-avatar>—</div>
           <div>
-            <h2 data-active-name>Alex</h2>
-            <p><span class="online-dot"></span> Private conversation</p>
+            <h2 data-active-name>No conversation selected</h2>
+            <p>Choose a user when contacts are available</p>
           </div>
         </div>
       </header>
@@ -87,14 +76,14 @@
               <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/>
             </svg>
           </div>
-          <h2>Your private chat</h2>
-          <p>Send a message to start the conversation.</p>
+          <h2>No conversations yet</h2>
+          <p>Alex and Jamie have been removed. Add real practice users later.</p>
         </div>
       </section>
 
       <form class="message-form">
-        <input type="text" name="message" placeholder="Type a message..." autocomplete="off" data-message-input>
-        <button type="submit" aria-label="Send message">
+        <input type="text" name="message" placeholder="Select a conversation first" autocomplete="off" data-message-input disabled>
+        <button type="submit" aria-label="Send message" disabled>
           <span>Send</span>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="m22 2-7 20-4-9-9-4Z"/>
