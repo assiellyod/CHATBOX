@@ -1,11 +1,9 @@
 // CHATBOX JavaScript
-// Tailwind CSS handles all visual styling. No custom CSS file is required.
+// Bootstrap 5 handles all visual styling. No custom CSS file is required.
 
 const api = window.ChatboxAPI;
 
 const sidebar = document.querySelector('[data-sidebar]');
-const overlay = document.querySelector('[data-sidebar-overlay]');
-const menuButton = document.querySelector('[data-menu-toggle]');
 const themeButton = document.querySelector('[data-theme-toggle]');
 const searchInput = document.querySelector('[data-search]');
 const newChatButton = document.querySelector('[data-new-chat]');
@@ -21,18 +19,33 @@ let users = [];
 let activeConversation = null;
 let activeOtherUser = null;
 
-function setSidebar(open) {
-  if (!sidebar || !overlay) return;
-  sidebar.classList.toggle('-translate-x-full', !open);
-  sidebar.classList.toggle('translate-x-0', open);
-  overlay.classList.toggle('hidden', !open);
+function getSidebarInstance() {
+  if (!sidebar || !window.bootstrap?.Offcanvas) return null;
+  return bootstrap.Offcanvas.getOrCreateInstance(sidebar);
 }
 
-menuButton?.addEventListener('click', () => setSidebar(true));
-overlay?.addEventListener('click', () => setSidebar(false));
+function openSidebar() {
+  if (window.innerWidth < 992) getSidebarInstance()?.show();
+}
+
+function closeSidebar() {
+  if (window.innerWidth < 992) getSidebarInstance()?.hide();
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-bs-theme', theme);
+  localStorage.setItem('chatbox_theme', theme);
+
+  if (themeButton) {
+    const dark = theme === 'dark';
+    themeButton.setAttribute('aria-label', dark ? 'Use light theme' : 'Use dark theme');
+    themeButton.title = dark ? 'Use light theme' : 'Use dark theme';
+  }
+}
 
 themeButton?.addEventListener('click', () => {
-  document.documentElement.classList.toggle('dark');
+  const current = document.documentElement.getAttribute('data-bs-theme') || 'light';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
 });
 
 searchInput?.addEventListener('input', () => {
@@ -41,14 +54,14 @@ searchInput?.addEventListener('input', () => {
 
 function emptyContactsMarkup(hasUsers) {
   return `
-    <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center dark:border-slate-700 dark:bg-slate-800/60">
-      <div class="mx-auto grid h-11 w-11 place-items-center rounded-full bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-300">
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+    <div class="border rounded-4 bg-body-tertiary p-4 text-center">
+      <div class="text-body-secondary mb-3">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
           <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/>
         </svg>
       </div>
-      <p class="mt-3 text-sm font-semibold">${hasUsers ? 'No matches' : 'No other users yet'}</p>
-      <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">${hasUsers ? 'Try another search.' : 'Add practice users to start a chat.'}</p>
+      <p class="small fw-semibold mb-1">${hasUsers ? 'No matches' : 'No other users yet'}</p>
+      <p class="small text-body-secondary mb-0">${hasUsers ? 'Try another search.' : 'Add practice users to start a chat.'}</p>
     </div>
   `;
 }
@@ -72,21 +85,21 @@ function renderUsers(search = '') {
   filtered.forEach((user) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'mb-2 flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-indigo-100 dark:hover:bg-slate-800 dark:focus:ring-indigo-950';
+    button.className = 'btn btn-light w-100 d-flex align-items-center gap-3 text-start rounded-4 p-3 mb-2';
 
     const avatar = document.createElement('span');
-    avatar.className = 'grid h-11 w-11 shrink-0 place-items-center rounded-full bg-indigo-100 font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300';
+    avatar.className = 'badge rounded-circle text-bg-primary p-3 flex-shrink-0';
     avatar.textContent = user.displayName.charAt(0).toUpperCase();
 
     const info = document.createElement('span');
-    info.className = 'min-w-0 flex-1';
+    info.className = 'flex-grow-1 overflow-hidden';
 
     const name = document.createElement('strong');
-    name.className = 'block truncate text-sm font-semibold';
+    name.className = 'd-block text-truncate small';
     name.textContent = user.displayName;
 
     const hint = document.createElement('small');
-    hint.className = 'mt-1 block truncate text-xs text-slate-500 dark:text-slate-400';
+    hint.className = 'd-block text-truncate text-body-secondary mt-1';
     hint.textContent = 'Start a conversation';
 
     info.append(name, hint);
@@ -102,23 +115,20 @@ async function openConversation(user) {
     activeConversation = await api.getOrCreateDirectConversation(user.id);
 
     if (activeName) activeName.textContent = user.displayName;
-    if (activeAvatar) activeAvatar.textContent = user.displayName.charAt(0).toUpperCase();
+    if (activeAvatar) {
+      activeAvatar.textContent = user.displayName.charAt(0).toUpperCase();
+      activeAvatar.className = 'badge rounded-circle text-bg-primary p-3';
+    }
 
     if (messageInput) {
       messageInput.disabled = false;
       messageInput.placeholder = `Message ${user.displayName}`;
-      messageInput.classList.remove('bg-slate-100', 'text-slate-500', 'dark:bg-slate-800', 'dark:text-slate-400');
-      messageInput.classList.add('bg-white', 'text-slate-900', 'focus:border-indigo-500', 'focus:ring-4', 'focus:ring-indigo-100', 'dark:bg-slate-900', 'dark:text-white', 'dark:focus:ring-indigo-950');
     }
 
-    if (sendButton) {
-      sendButton.disabled = false;
-      sendButton.classList.remove('opacity-50');
-      sendButton.classList.add('hover:bg-indigo-700');
-    }
+    if (sendButton) sendButton.disabled = false;
 
     await renderMessages();
-    setSidebar(false);
+    closeSidebar();
   } catch (error) {
     showError(error.message);
   }
@@ -127,16 +137,20 @@ async function openConversation(user) {
 function showConversationEmpty() {
   if (!messagesArea || !activeOtherUser) return;
 
-  messagesArea.className = 'flex min-h-0 flex-1 items-center justify-center overflow-y-auto bg-slate-50 p-5 sm:p-8 dark:bg-slate-950';
+  messagesArea.className = 'd-flex align-items-center justify-content-center flex-grow-1 overflow-auto bg-body-tertiary p-3 p-md-4';
   messagesArea.innerHTML = `
-    <div class="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300">
-        <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-          <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/>
-        </svg>
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4 p-md-5 text-center">
+          <div class="text-primary mb-3">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/>
+            </svg>
+          </div>
+          <h2 class="h5 fw-bold">Start your conversation</h2>
+          <p class="text-body-secondary mb-0">Send a message to ${escapeText(activeOtherUser.displayName)}.</p>
+        </div>
       </div>
-      <h2 class="mt-4 text-lg font-bold">Start your conversation</h2>
-      <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Send a message to ${escapeText(activeOtherUser.displayName)}.</p>
     </div>
   `;
 }
@@ -153,32 +167,34 @@ async function renderMessages() {
   }
 
   const currentUser = await api.getCurrentUser();
-  messagesArea.className = 'min-h-0 flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 dark:bg-slate-950';
+  messagesArea.className = 'flex-grow-1 overflow-auto bg-body-tertiary p-3 p-md-4';
 
   const stack = document.createElement('div');
-  stack.className = 'mx-auto flex w-full max-w-4xl flex-col gap-3';
+  stack.className = 'container-fluid px-0 d-flex flex-column gap-2';
 
   messageItems.forEach((item) => {
     const mine = item.senderId === currentUser.id;
     const row = document.createElement('div');
-    row.className = `flex items-end gap-2 ${mine ? 'justify-end' : 'justify-start'}`;
+    row.className = `d-flex align-items-end gap-2 ${mine ? 'justify-content-end' : 'justify-content-start'}`;
 
     if (!mine) {
-      const avatar = document.createElement('div');
-      avatar.className = 'grid h-8 w-8 shrink-0 place-items-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300';
+      const avatar = document.createElement('span');
+      avatar.className = 'badge rounded-circle text-bg-secondary p-2 flex-shrink-0';
       avatar.textContent = activeOtherUser.displayName.charAt(0).toUpperCase();
       row.appendChild(avatar);
     }
 
     const bubble = document.createElement('div');
-    bubble.className = `max-w-[78%] rounded-2xl px-4 py-2.5 shadow-sm ${mine ? 'rounded-br-md bg-indigo-600 text-white' : 'rounded-bl-md border border-slate-200 bg-white text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-white'}`;
+    bubble.className = mine
+      ? 'border border-primary rounded-4 bg-primary text-white px-3 py-2 shadow-sm'
+      : 'border rounded-4 bg-body text-body px-3 py-2 shadow-sm';
 
     const text = document.createElement('p');
-    text.className = 'whitespace-pre-wrap break-words text-sm leading-6';
+    text.className = 'mb-1 small';
     text.textContent = item.body;
 
     const time = document.createElement('time');
-    time.className = `mt-1 block text-[11px] ${mine ? 'text-indigo-100' : 'text-slate-400'}`;
+    time.className = mine ? 'd-block small text-white-50' : 'd-block small text-body-secondary';
     time.textContent = new Date(item.createdAt).toLocaleTimeString([], {
       hour: 'numeric',
       minute: '2-digit'
@@ -223,7 +239,7 @@ messageInput?.addEventListener('keydown', (event) => {
 
 newChatButton?.addEventListener('click', () => {
   searchInput?.focus();
-  setSidebar(true);
+  openSidebar();
   renderUsers();
 });
 
@@ -247,6 +263,7 @@ async function boot() {
     return;
   }
 
+  applyTheme(localStorage.getItem('chatbox_theme') === 'dark' ? 'dark' : 'light');
   await api.init();
   users = await api.getUsers();
   renderUsers();
