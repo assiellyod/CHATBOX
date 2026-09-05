@@ -10,8 +10,6 @@ const messageInput = document.querySelector('[data-message-input]');
 const messages = document.querySelector('.messages');
 const activeName = document.querySelector('[data-active-name]');
 const activeAvatar = document.querySelector('[data-active-avatar]');
-const accountLabel = document.querySelector('[data-account-label]');
-const accountActionText = document.querySelector('[data-account-action-text]');
 
 const api = window.ChatboxAPI;
 let currentUser = null;
@@ -102,12 +100,6 @@ function appendMessage(messageData) {
 }
 
 async function renderConversation() {
-  if (!currentUser) {
-    activeConversationId = null;
-    showEmptyState('Create an account first. Your practice data will be saved in this browser.');
-    return;
-  }
-
   try {
     const conversation = await api.getOrCreateDirectConversation(activeOtherUserId);
     activeConversationId = conversation.id;
@@ -148,12 +140,6 @@ messageForm?.addEventListener('submit', async (event) => {
   const text = messageInput.value.trim();
   if (!text) return;
 
-  if (!currentUser) {
-    alert('Create an account first so CHATBOX can save your practice messages.');
-    window.location.href = 'register.html';
-    return;
-  }
-
   try {
     if (!activeConversationId) {
       const conversation = await api.getOrCreateDirectConversation(activeOtherUserId);
@@ -193,15 +179,6 @@ async function boot() {
 
   await api.init();
   currentUser = await api.getCurrentUser();
-
-  if (currentUser) {
-    if (accountLabel) accountLabel.textContent = `Signed in as ${currentUser.displayName}`;
-    if (accountActionText) accountActionText.textContent = 'Add another account';
-  } else {
-    if (accountLabel) accountLabel.textContent = 'Private messaging';
-    if (accountActionText) accountActionText.textContent = 'Add account';
-  }
-
   await renderConversation();
 }
 
