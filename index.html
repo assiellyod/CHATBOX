@@ -18,7 +18,7 @@
             <div class="brand-mark" aria-hidden="true">CB</div>
             <div>
               <h1>CHATBOX</h1>
-              <p>Private messaging</p>
+              <p data-account-label>Private messaging</p>
             </div>
           </div>
           <button class="icon-button" type="button" data-theme-toggle aria-label="Use dark theme" title="Dark theme">
@@ -35,13 +35,13 @@
           New conversation
         </button>
 
-        <a class="account-action" href="register.html" aria-label="Create account">
+        <a class="account-action" href="register.html" aria-label="Create account" data-account-action>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M15 19a6 6 0 0 0-12 0"/>
             <circle cx="9" cy="7" r="4"/>
             <path d="M19 8v6M16 11h6"/>
           </svg>
-          Add account
+          <span data-account-action-text>Add account</span>
         </a>
       </div>
 
@@ -54,7 +54,7 @@
       </label>
 
       <div class="conversation-list">
-        <button class="conversation active" type="button" data-name="Alex" data-avatar="A">
+        <button class="conversation active" type="button" data-name="Alex" data-avatar="A" data-user-id="usr_alex">
           <span class="avatar">A</span>
           <span class="conversation-info">
             <strong>Alex</strong>
@@ -62,7 +62,7 @@
           </span>
         </button>
 
-        <button class="conversation" type="button" data-name="Jamie" data-avatar="J">
+        <button class="conversation" type="button" data-name="Jamie" data-avatar="J" data-user-id="usr_jamie">
           <span class="avatar">J</span>
           <span class="conversation-info">
             <strong>Jamie</strong>
@@ -98,7 +98,7 @@
             </svg>
           </div>
           <h2>Your private chat</h2>
-          <p>Send a message to start the conversation.</p>
+          <p>Create an account, then send a message to start the conversation.</p>
         </div>
       </section>
 
@@ -115,6 +115,7 @@
     </main>
   </div>
 
+  <script src="api/client.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
