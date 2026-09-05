@@ -1,3 +1,0 @@
-/* Account entry point kept separate so it can be removed or merged later. */
-.account-action{display:flex;align-items:center;justify-content:center;gap:8px;min-height:42px;margin-top:10px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);font-weight:700;text-decoration:none;transition:.2s ease}
-.account-action:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft)}
