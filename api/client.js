@@ -96,6 +96,31 @@
     return db.users.map(({ passwordHash, ...safeUser }) => safeUser);
   }
 
+  async function registerUser({ displayName, email }) {
+    const db = await init();
+    const name = String(displayName || '').trim();
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+
+    if (name.length < 2) throw new Error('Name must be at least 2 characters.');
+    if (!normalizedEmail || !normalizedEmail.includes('@')) throw new Error('Enter a valid email address.');
+    if (db.users.some((user) => String(user.email || '').toLowerCase() === normalizedEmail)) {
+      throw new Error('That email is already registered on this browser.');
+    }
+
+    const user = {
+      id: makeId('usr'),
+      displayName: name,
+      email: normalizedEmail,
+      passwordHash: null,
+      demo: true,
+      createdAt: new Date().toISOString()
+    };
+
+    db.users.push(user);
+    writeDb(db);
+    return clone(user);
+  }
+
   async function getOrCreateDirectConversation(otherUserId) {
     const db = await init();
     const me = currentUserId();
@@ -176,6 +201,7 @@
     init,
     getCurrentUser,
     getUsers,
+    registerUser,
     getConversations,
     getOrCreateDirectConversation,
     getMessages,
