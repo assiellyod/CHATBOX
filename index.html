@@ -1,143 +1,137 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#4f46e5">
+  <meta name="theme-color" content="#0d6efd">
   <meta name="description" content="CHATBOX private messaging interface">
   <title>CHATBOX — Private Messaging</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: 'class' };
-  </script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="h-full overflow-hidden bg-slate-100 text-slate-900 antialiased dark:bg-slate-950 dark:text-white">
-  <div class="flex h-screen w-full">
+<body class="vh-100 overflow-hidden bg-body-tertiary">
+  <div class="d-flex vh-100 overflow-hidden">
     <aside
-      class="fixed inset-y-0 left-0 z-40 flex w-80 -translate-x-full flex-col border-r border-slate-200 bg-white transition-transform duration-200 lg:static lg:translate-x-0 dark:border-slate-800 dark:bg-slate-900"
-      aria-label="Conversations"
+      class="offcanvas-lg offcanvas-start border-end bg-body flex-shrink-0"
+      tabindex="-1"
+      id="chatSidebar"
+      aria-labelledby="chatSidebarLabel"
       data-sidebar
     >
-      <div class="border-b border-slate-200 p-5 dark:border-slate-800">
-        <div class="flex items-center justify-between gap-3">
-          <div class="flex min-w-0 items-center gap-3">
-            <div class="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-indigo-600 font-bold text-white shadow-sm">CB</div>
-            <div class="min-w-0">
-              <h1 class="truncate text-lg font-bold tracking-tight">CHATBOX</h1>
-              <p class="truncate text-xs text-slate-500 dark:text-slate-400">Private messaging</p>
+      <div class="offcanvas-header border-bottom d-lg-none">
+        <h2 class="offcanvas-title fs-6 fw-bold" id="chatSidebarLabel">Conversations</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#chatSidebar" aria-label="Close"></button>
+      </div>
+
+      <div class="d-flex flex-column h-100">
+        <div class="p-3 border-bottom">
+          <div class="d-flex align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3 min-w-0">
+              <span class="badge rounded-4 text-bg-primary fs-6 p-3">CB</span>
+              <div class="overflow-hidden">
+                <h1 class="h6 fw-bold mb-0 text-truncate">CHATBOX</h1>
+                <p class="small text-body-secondary mb-0 text-truncate">Private messaging</p>
+              </div>
             </div>
+
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm rounded-3"
+              data-theme-toggle
+              aria-label="Use dark theme"
+              title="Use dark theme"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+              </svg>
+            </button>
           </div>
 
-          <button
-            type="button"
-            class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-            data-theme-toggle
-            aria-label="Toggle theme"
-            title="Toggle theme"
-          >
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>
+          <button type="button" class="btn btn-primary w-100 mt-3 rounded-3 fw-semibold" data-new-chat>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 5v14M5 12h14"/>
             </svg>
+            <span class="ms-1">New conversation</span>
           </button>
         </div>
 
-        <button
-          type="button"
-          class="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200 dark:focus:ring-indigo-950"
-          data-new-chat
-        >
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M12 5v14M5 12h14"/>
-          </svg>
-          New conversation
-        </button>
-      </div>
-
-      <div class="p-4">
-        <label class="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100 dark:border-slate-700 dark:bg-slate-800 dark:focus-within:ring-indigo-950">
-          <svg class="h-5 w-5 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <circle cx="11" cy="11" r="7"/>
-            <path d="m20 20-3.2-3.2"/>
-          </svg>
-          <input
-            type="search"
-            placeholder="Search conversations"
-            autocomplete="off"
-            class="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
-            data-search
-          >
-        </label>
-      </div>
-
-      <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-4" data-conversation-list>
-        <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center dark:border-slate-700 dark:bg-slate-800/60">
-          <div class="mx-auto grid h-11 w-11 place-items-center rounded-full bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-300">
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/>
-            </svg>
+        <div class="p-3">
+          <div class="input-group">
+            <span class="input-group-text bg-body-tertiary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"/>
+                <path d="m20 20-3.2-3.2"/>
+              </svg>
+            </span>
+            <input type="search" class="form-control bg-body-tertiary" placeholder="Search conversations" autocomplete="off" data-search>
           </div>
-          <p class="mt-3 text-sm font-semibold">No conversations yet</p>
-          <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">Real practice users can be added later.</p>
+        </div>
+
+        <div class="flex-grow-1 overflow-auto px-3 pb-3" data-conversation-list>
+          <div class="border rounded-4 bg-body-tertiary p-4 text-center">
+            <div class="mb-3 text-body-secondary">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/>
+              </svg>
+            </div>
+            <p class="small fw-semibold mb-1">No conversations yet</p>
+            <p class="small text-body-secondary mb-0">Real practice users can be added later.</p>
+          </div>
         </div>
       </div>
     </aside>
 
-    <button
-      type="button"
-      class="fixed inset-0 z-30 hidden bg-slate-950/40 lg:hidden"
-      aria-label="Close menu"
-      data-sidebar-overlay
-    ></button>
-
-    <main class="flex min-w-0 flex-1 flex-col bg-white dark:bg-slate-950">
-      <header class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200 px-4 sm:px-6 dark:border-slate-800 dark:bg-slate-900/70">
+    <main class="d-flex flex-column flex-grow-1 overflow-hidden bg-body">
+      <header class="d-flex align-items-center gap-3 border-bottom p-3 bg-body">
         <button
           type="button"
-          class="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-200 text-slate-600 lg:hidden dark:border-slate-700 dark:text-slate-300"
+          class="btn btn-outline-secondary d-lg-none"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#chatSidebar"
+          aria-controls="chatSidebar"
           data-menu-toggle
           aria-label="Open conversations"
         >
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M4 7h16M4 12h16M4 17h16"/>
           </svg>
         </button>
 
-        <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-slate-200 font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300" data-active-avatar>—</div>
-        <div class="min-w-0">
-          <h2 class="truncate text-sm font-semibold sm:text-base" data-active-name>No conversation selected</h2>
-          <p class="truncate text-xs text-slate-500 dark:text-slate-400">Choose a user when contacts are available</p>
+        <span class="badge rounded-circle text-bg-secondary p-3" data-active-avatar>—</span>
+        <div class="overflow-hidden">
+          <h2 class="h6 fw-semibold mb-0 text-truncate" data-active-name>No conversation selected</h2>
+          <p class="small text-body-secondary mb-0 text-truncate">Choose a user when contacts are available</p>
         </div>
       </header>
 
-      <section class="flex min-h-0 flex-1 items-center justify-center overflow-y-auto bg-slate-50 p-5 sm:p-8 dark:bg-slate-950" aria-label="Messages" data-messages>
-        <div class="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300">
-            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/>
-            </svg>
+      <section class="d-flex align-items-center justify-content-center flex-grow-1 overflow-auto bg-body-tertiary p-3 p-md-4" aria-label="Messages" data-messages>
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 p-md-5 text-center">
+              <div class="text-primary mb-3">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                  <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/>
+                </svg>
+              </div>
+              <h2 class="h5 fw-bold">No conversations yet</h2>
+              <p class="text-body-secondary mb-0">Add real practice users later, then start a private conversation here.</p>
+            </div>
           </div>
-          <h2 class="mt-4 text-lg font-bold">No conversations yet</h2>
-          <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Add real practice users later, then start a private conversation here.</p>
         </div>
       </section>
 
-      <form class="flex shrink-0 gap-2 border-t border-slate-200 bg-white p-3 sm:p-4 dark:border-slate-800 dark:bg-slate-900" data-message-form>
+      <form class="d-flex gap-2 border-top bg-body p-3" data-message-form>
         <input
           type="text"
           name="message"
           placeholder="Select a conversation first"
           autocomplete="off"
           disabled
-          class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500 outline-none disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+          class="form-control rounded-3"
           data-message-input
         >
-        <button
-          type="submit"
-          disabled
-          class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white opacity-50 disabled:cursor-not-allowed"
-        >
-          <span class="hidden sm:inline">Send</span>
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <button type="submit" disabled class="btn btn-primary rounded-3 px-3 px-sm-4">
+          <span class="d-none d-sm-inline">Send</span>
+          <svg class="ms-sm-1" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="m22 2-7 20-4-9-9-4Z"/>
             <path d="M22 2 11 13"/>
           </svg>
@@ -146,6 +140,7 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="api/client.js"></script>
   <script src="script.js"></script>
 </body>
