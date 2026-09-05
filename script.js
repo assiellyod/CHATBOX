@@ -68,14 +68,13 @@ function emptyContactsMarkup(hasUsers) {
 }
 
 function renderUsers(search = '') {
-  if (!conversationList) return;
+  if (!conversationList || !currentUser) return;
 
   const term = search.trim().toLowerCase();
-  const availableUsers = users.filter((user) =>
-    user.id !== 'usr_practice' && user.id !== currentUser?.id
-  );
+  const availableUsers = users.filter((user) => user.id !== currentUser.id);
   const filtered = availableUsers.filter((user) =>
-    user.displayName.toLowerCase().includes(term)
+    user.displayName.toLowerCase().includes(term) ||
+    String(user.email || '').toLowerCase().includes(term)
   );
 
   conversationList.innerHTML = '';
@@ -103,7 +102,7 @@ function renderUsers(search = '') {
 
     const hint = document.createElement('small');
     hint.className = 'd-block text-truncate text-body-secondary mt-1';
-    hint.textContent = 'Start a conversation';
+    hint.textContent = 'Tap to message';
 
     info.append(name, hint);
     button.append(avatar, info);
