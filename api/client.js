@@ -1,15 +1,15 @@
 (function () {
   'use strict';
 
-  const DB_KEY = 'chatbox_mock_db_v1';
+  const DB_KEY = 'chatbox_mock_db_v2';
   const SESSION_KEY = 'chatbox_session_v1';
   const SEED_URL = 'database/seed.json';
   const REMOVED_DEMO_IDS = new Set(['usr_alex', 'usr_jamie']);
+
   const PRACTICE_USER = {
     id: 'usr_practice',
     displayName: 'You',
     email: 'practice@chatbox.demo',
-    passwordHash: null,
     demo: true,
     createdAt: '2026-09-05T00:00:00.000Z'
   };
@@ -29,19 +29,36 @@
     return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
   }
 
+  function normalizeEmail(value) {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  function normalizeName(value) {
+    return String(value || '').trim().replace(/\s+/g, ' ');
+  }
+
   async function loadSeed() {
     try {
-      const response = await fetch(SEED_URL, { cache: 'no-store' });
+      const response = await fetch(`${SEED_URL}?v=20260905-2`, { cache: 'no-store' });
       if (!response.ok) throw new Error('Seed unavailable');
-      return await response.json();
+      const data = await response.json();
+      return {
+        users: Array.isArray(data.users) ? data.users : [],
+        conversations: Array.isArray(data.conversations) ? data.conversations : [],
+        messages: Array.isArray(data.messages) ? data.messages : []
+      };
     } catch (_) {
       return clone(fallbackSeed);
     }
   }
 
   function readDb() {
-    const raw = localStorage.getItem(DB_KEY);
-    return raw ? JSON.parse(raw) : null;
+    try {
+      const raw = localStorage.getItem(DB_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+      return null;
+    }
   }
 
   function writeDb(db) {
@@ -62,15 +79,37 @@
     db.messages = db.messages.filter((message) => !removedConversationIds.has(message.conversationId));
   }
 
+  function mergeSeedUsers(db, seed) {
+    seed.users.forEach((seedUser) => {
+      if (!seedUser?.id || REMOVED_DEMO_IDS.has(seedUser.id)) return;
+
+      const existingIndex = db.users.findIndex((user) =>
+        user.id === seedUser.id ||
+        (seedUser.email && normalizeEmail(user.email) === normalizeEmail(seedUser.email))
+      );
+
+      if (existingIndex === -1) {
+        db.users.push(clone(seedUser));
+      } else if (seedUser.id === PRACTICE_USER.id) {
+        db.users[existingIndex] = { ...db.users[existingIndex], ...clone(PRACTICE_USER) };
+      }
+    });
+  }
+
   async function init() {
+    const seed = await loadSeed();
     let db = readDb();
-    if (!db) db = await loadSeed();
+
+    if (!db) {
+      db = clone(seed);
+    }
 
     db.users = Array.isArray(db.users) ? db.users : [];
     db.conversations = Array.isArray(db.conversations) ? db.conversations : [];
     db.messages = Array.isArray(db.messages) ? db.messages : [];
 
     removeLegacyDemoData(db);
+    mergeSeedUsers(db, seed);
 
     if (!db.users.some((user) => user.id === PRACTICE_USER.id)) {
       db.users.unshift(clone(PRACTICE_USER));
@@ -78,7 +117,7 @@
 
     writeDb(db);
     localStorage.setItem(SESSION_KEY, PRACTICE_USER.id);
-    return db;
+    return clone(db);
   }
 
   function currentUserId() {
@@ -93,26 +132,28 @@
 
   async function getUsers() {
     const db = await init();
-    return db.users.map(({ passwordHash, ...safeUser }) => safeUser);
+    return db.users.map(clone);
   }
 
   async function registerUser({ displayName, email }) {
     const db = await init();
-    const name = String(displayName || '').trim();
-    const normalizedEmail = String(email || '').trim().toLowerCase();
+    const name = normalizeName(displayName);
+    const normalizedEmail = normalizeEmail(email);
 
-    if (name.length < 2) throw new Error('Name must be at least 2 characters.');
-    if (!normalizedEmail || !normalizedEmail.includes('@')) throw new Error('Enter a valid email address.');
-    if (db.users.some((user) => String(user.email || '').toLowerCase() === normalizedEmail)) {
-      throw new Error('That email is already registered on this browser.');
+    if (name.length < 2) throw new Error('Full name must be at least 2 characters.');
+    if (name.length > 80) throw new Error('Full name is too long.');
+    if (!normalizedEmail || !/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+      throw new Error('Enter a valid email address.');
     }
+
+    const duplicate = db.users.find((user) => normalizeEmail(user.email) === normalizedEmail);
+    if (duplicate) throw new Error('That email is already registered on this browser.');
 
     const user = {
       id: makeId('usr'),
       displayName: name,
       email: normalizedEmail,
-      passwordHash: null,
-      demo: true,
+      demo: false,
       createdAt: new Date().toISOString()
     };
 
@@ -124,6 +165,7 @@
   async function getOrCreateDirectConversation(otherUserId) {
     const db = await init();
     const me = currentUserId();
+
     if (!otherUserId) throw new Error('Select a user first.');
     if (me === otherUserId) throw new Error('You cannot start a private chat with yourself.');
 
@@ -151,14 +193,20 @@
   async function getConversations() {
     const db = await init();
     const me = currentUserId();
-    return db.conversations.filter((item) => (item.memberIds || []).includes(me)).map(clone);
+    return db.conversations
+      .filter((item) => (item.memberIds || []).includes(me))
+      .map(clone);
   }
 
   async function getMessages(conversationId) {
     const db = await init();
     const me = currentUserId();
     const conversation = db.conversations.find((item) => item.id === conversationId);
-    if (!conversation || !(conversation.memberIds || []).includes(me)) throw new Error('Conversation not found.');
+
+    if (!conversation || !(conversation.memberIds || []).includes(me)) {
+      throw new Error('Conversation not found.');
+    }
+
     return db.messages
       .filter((message) => message.conversationId === conversationId)
       .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
@@ -169,10 +217,13 @@
     const db = await init();
     const me = currentUserId();
     const text = String(body || '').trim();
+
     if (!text) throw new Error('Message cannot be empty.');
 
     const conversation = db.conversations.find((item) => item.id === conversationId);
-    if (!conversation || !(conversation.memberIds || []).includes(me)) throw new Error('Conversation not found.');
+    if (!conversation || !(conversation.memberIds || []).includes(me)) {
+      throw new Error('Conversation not found.');
+    }
 
     const message = {
       id: makeId('msg'),
@@ -182,6 +233,7 @@
       createdAt: new Date().toISOString(),
       editedAt: null
     };
+
     db.messages.push(message);
     writeDb(db);
     return clone(message);
@@ -190,8 +242,12 @@
   async function deleteMessage(messageId) {
     const db = await init();
     const me = currentUserId();
-    const index = db.messages.findIndex((message) => message.id === messageId && message.senderId === me);
+    const index = db.messages.findIndex((message) =>
+      message.id === messageId && message.senderId === me
+    );
+
     if (index < 0) throw new Error('Message not found or not yours.');
+
     db.messages.splice(index, 1);
     writeDb(db);
     return true;
@@ -199,9 +255,9 @@
 
   window.ChatboxAPI = {
     init,
+    registerUser,
     getCurrentUser,
     getUsers,
-    registerUser,
     getConversations,
     getOrCreateDirectConversation,
     getMessages,
