@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Basic information about the page -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHATBOX</title>
+
+  <!-- CSS will be connected here later -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <!-- Main container: holds the whole CHATBOX app -->
+  <div class="chatbox">
+
+    <!-- Sidebar: shows the app name and conversations -->
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>CHATBOX</h1>
+        <p>Private messages</p>
+      </div>
+
+      <!-- Button for starting a new conversation -->
+      <button class="new-chat" type="button">+ New Chat</button>
+
+      <!-- List of conversations -->
+      <div class="conversation-list">
+        <button class="conversation active" type="button">
+          <span class="avatar">A</span>
+          <span class="conversation-info">
+            <strong>Alex</strong>
+            <small>Start a conversation</small>
+          </span>
+        </button>
+
+        <button class="conversation" type="button">
+          <span class="avatar">J</span>
+          <span class="conversation-info">
+            <strong>Jamie</strong>
+            <small>No messages yet</small>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Chat area: where messages will appear -->
+    <main class="chat-area">
+      <!-- Header for the selected private conversation -->
+      <header class="chat-header">
+        <div>
+          <h2>Alex</h2>
+          <p>Private conversation</p>
+        </div>
+      </header>
+
+      <!-- Messages will be inserted inside this section later with JavaScript -->
+      <section class="messages" aria-label="Messages">
+        <div class="empty-state">
+          <h2>Your private chat</h2>
+          <p>Send a message to start the conversation.</p>
+        </div>
+      </section>
+
+      <!-- Message form: JavaScript will handle sending later -->
+      <form class="message-form">
+        <input
+          type="text"
+          name="message"
+          placeholder="Type a message..."
+          autocomplete="off"
+        >
+        <button type="submit">Send</button>
+      </form>
+    </main>
+  </div>
+
+  <!-- JavaScript will be connected here later -->
+  <script src="script.js"></script>
+</body>
+</html>
