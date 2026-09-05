@@ -1,0 +1,125 @@
+/* =========================================================
+   CHATBOX CHRISTMAS THEME
+   This file controls the Christmas look of the website.
+   ========================================================= */
+
+/* Main page: snowy night + Christmas lights */
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: #fff;
+  background:
+    radial-gradient(circle at 50% 115%, rgba(255, 214, 102, 0.28), transparent 28%),
+    radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.10), transparent 24%),
+    linear-gradient(135deg, #071f17 0%, #0b3d2e 48%, #351018 100%) !important;
+  position: relative;
+}
+
+/* Soft Christmas glow behind the whole app */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(255, 70, 70, .18) 0 2px, transparent 3px),
+    radial-gradient(circle at 92% 12%, rgba(255, 220, 80, .20) 0 2px, transparent 3px),
+    radial-gradient(circle at 18% 85%, rgba(80, 220, 120, .16) 0 2px, transparent 3px),
+    radial-gradient(circle at 82% 82%, rgba(255, 90, 90, .16) 0 2px, transparent 3px);
+  background-size: 130px 130px, 170px 170px, 190px 190px, 150px 150px;
+  z-index: 0;
+}
+
+/* Keep CHATBOX panels above the background */
+body > .d-flex {
+  position: relative;
+  z-index: 1;
+}
+
+/* Make Bootstrap panels transparent/glassy so the Christmas background shows */
+.bg-body,
+.bg-body-tertiary,
+.offcanvas,
+.card,
+.input-group-text,
+.form-control {
+  background-color: rgba(5, 25, 19, 0.55) !important;
+  color: #fff !important;
+}
+
+/* Sidebar and header borders */
+.border-end,
+.border-bottom,
+.border-top,
+.border {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Text that Bootstrap normally makes gray */
+.text-body-secondary {
+  color: rgba(255, 255, 255, 0.70) !important;
+}
+
+/* CHATBOX badge */
+.text-bg-primary {
+  background: linear-gradient(135deg, #c62828, #8b1020) !important;
+}
+
+/* Buttons: Christmas red */
+.btn-primary {
+  border: 0;
+  background: linear-gradient(135deg, #d62828, #a4161a) !important;
+  box-shadow: 0 6px 18px rgba(214, 40, 40, .25);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+/* Secondary buttons */
+.btn-outline-secondary {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, .35) !important;
+}
+
+/* Search and message inputs */
+.form-control::placeholder {
+  color: rgba(255, 255, 255, .55) !important;
+}
+
+/* Empty message card */
+.card {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, .22) !important;
+}
+
+/* Christmas snowflakes */
+body::after {
+  content: "❄  ❅  ❄     ❆     ❄  ❅     ❄     ❆  ❄";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  color: rgba(255, 255, 255, .78);
+  font-size: 22px;
+  line-height: 90px;
+  letter-spacing: 18px;
+  word-spacing: 18px;
+  white-space: normal;
+  overflow: hidden;
+  text-shadow: 0 0 8px rgba(255,255,255,.45);
+}
+
+/* Make the app comfortable on phones */
+@media (max-width: 991.98px) {
+  body::after {
+    font-size: 17px;
+    letter-spacing: 10px;
+    word-spacing: 10px;
+  }
+}
