@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const DB_KEY = 'chatbox_mock_db_v2';
+  const DB_KEY = 'chatbox_mock_db_v1';
   const SESSION_KEY = 'chatbox_session_v1';
   const SEED_URL = 'database/seed.json';
   const REMOVED_DEMO_IDS = new Set(['usr_alex', 'usr_jamie']);
@@ -100,9 +100,7 @@
     const seed = await loadSeed();
     let db = readDb();
 
-    if (!db) {
-      db = clone(seed);
-    }
+    if (!db) db = clone(seed);
 
     db.users = Array.isArray(db.users) ? db.users : [];
     db.conversations = Array.isArray(db.conversations) ? db.conversations : [];
