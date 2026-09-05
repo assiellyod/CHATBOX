@@ -1,55 +1,50 @@
-# CHATBOX API Structure
+# CHATBOX Practice API
 
-This folder contains the backend API structure for the private CHATBOX project.
+This repository now includes a browser-based mock API for the practice project.
 
-## Planned structure
+## Current implementation
 
-```text
-api/
-├── README.md
-├── routes/
-│   ├── auth.js
-│   ├── users.js
-│   ├── chats.js
-│   └── messages.js
-├── controllers/
-│   ├── authController.js
-│   ├── userController.js
-│   ├── chatController.js
-│   └── messageController.js
-├── middleware/
-│   ├── auth.js
-│   └── errorHandler.js
-├── services/
-│   ├── authService.js
-│   ├── chatService.js
-│   └── messageService.js
-├── models/
-│   ├── User.js
-│   ├── Chat.js
-│   └── Message.js
-└── config/
-    └── README.md
-```
+`api/client.js` exposes `window.ChatboxAPI` with these methods:
 
-## Core API endpoints
+- `init()`
+- `register({ fullName, email, password })`
+- `login({ email, password })`
+- `logout()`
+- `getCurrentUser()`
+- `getUsers()`
+- `getConversations()`
+- `getOrCreateDirectConversation(otherUserId)`
+- `getMessages(conversationId)`
+- `sendMessage(conversationId, body)`
+- `deleteMessage(messageId)`
 
-- `POST /api/auth/register` — create an account
-- `POST /api/auth/login` — sign in
-- `POST /api/auth/logout` — sign out
-- `GET /api/users/me` — current user
-- `GET /api/chats` — user's private chats
-- `POST /api/chats` — create a private chat
-- `GET /api/chats/:chatId/messages` — read messages
-- `POST /api/chats/:chatId/messages` — send a message
-- `DELETE /api/messages/:messageId` — delete a message
+## Practice database flow
 
-## Security rules
+1. Starter records are read from `database/seed.json` in GitHub.
+2. The browser creates a local working copy in `localStorage`.
+3. New accounts, conversations, and messages are written to that local working copy.
+4. `database/schema.sql` remains the PostgreSQL-oriented design for a future real backend.
 
-- Never commit API keys, passwords, tokens, or database credentials.
-- Authentication tokens must be handled server-side.
-- Private chats must be authorized per user/chat membership.
-- Validate and sanitize API input.
-- Use HTTPS in production.
+## Why it works this way
 
-This is the API blueprint only. Frontend UI and database implementation will be added separately.
+GitHub Pages serves static files only. A browser should not be given a GitHub write token just to save chat records because that would expose repository credentials. This practice version therefore keeps the API and database design in GitHub while using browser storage for safe local CRUD practice.
+
+## Future real server endpoints
+
+The frontend API shape can later map to endpoints such as:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/users/me`
+- `GET /api/chats`
+- `POST /api/chats`
+- `GET /api/chats/:chatId/messages`
+- `POST /api/chats/:chatId/messages`
+- `DELETE /api/messages/:messageId`
+
+## Security notes
+
+- Never commit API keys, passwords, access tokens, or database credentials.
+- Passwords in this practice browser database are stored as SHA-256 hashes for demonstration only; this is not production-grade password storage.
+- A production backend should use a slow password hashing algorithm such as Argon2id or bcrypt and perform authorization server-side.
