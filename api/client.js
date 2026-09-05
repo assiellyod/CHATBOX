@@ -8,8 +8,9 @@
 
   const PRACTICE_USER = {
     id: 'usr_practice',
-    displayName: 'You',
-    email: 'practice@chatbox.demo',
+    displayName: 'Main Account',
+    email: 'owner@chatbox.demo',
+    role: 'owner',
     demo: true,
     createdAt: '2026-09-05T00:00:00.000Z'
   };
@@ -39,7 +40,7 @@
 
   async function loadSeed() {
     try {
-      const response = await fetch(`${SEED_URL}?v=20260905-3`, { cache: 'no-store' });
+      const response = await fetch(`${SEED_URL}?v=20260905-4`, { cache: 'no-store' });
       if (!response.ok) throw new Error('Seed unavailable');
       const data = await response.json();
       return {
@@ -151,7 +152,7 @@
     }
 
     const duplicate = db.users.find((user) => normalizeEmail(user.email) === normalizedEmail);
-    if (duplicate && duplicate.id !== PRACTICE_USER.id) {
+    if (duplicate) {
       localStorage.setItem(SESSION_KEY, duplicate.id);
       return clone(duplicate);
     }
@@ -160,6 +161,7 @@
       id: makeId('usr'),
       displayName: name,
       email: normalizedEmail,
+      role: 'user',
       demo: false,
       createdAt: new Date().toISOString()
     };
