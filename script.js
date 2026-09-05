@@ -16,6 +16,7 @@ const sendButton = messageForm?.querySelector('button[type="submit"]');
 const messagesArea = document.querySelector('[data-messages]');
 
 let users = [];
+let currentUser = null;
 let activeConversation = null;
 let activeOtherUser = null;
 
@@ -61,7 +62,7 @@ function emptyContactsMarkup(hasUsers) {
         </svg>
       </div>
       <p class="small fw-semibold mb-1">${hasUsers ? 'No matches' : 'No other users yet'}</p>
-      <p class="small text-body-secondary mb-0">${hasUsers ? 'Try another search.' : 'Add practice users to start a chat.'}</p>
+      <p class="small text-body-secondary mb-0">${hasUsers ? 'Try another search.' : 'Register another practice user to start a chat.'}</p>
     </div>
   `;
 }
@@ -70,7 +71,9 @@ function renderUsers(search = '') {
   if (!conversationList) return;
 
   const term = search.trim().toLowerCase();
-  const availableUsers = users.filter((user) => user.id !== 'usr_practice');
+  const availableUsers = users.filter((user) =>
+    user.id !== 'usr_practice' && user.id !== currentUser?.id
+  );
   const filtered = availableUsers.filter((user) =>
     user.displayName.toLowerCase().includes(term)
   );
@@ -166,7 +169,7 @@ async function renderMessages() {
     return;
   }
 
-  const currentUser = await api.getCurrentUser();
+  currentUser = await api.getCurrentUser();
   messagesArea.className = 'flex-grow-1 overflow-auto bg-body-tertiary p-3 p-md-4';
 
   const stack = document.createElement('div');
@@ -265,6 +268,7 @@ async function boot() {
 
   applyTheme(localStorage.getItem('chatbox_theme') === 'dark' ? 'dark' : 'light');
   await api.init();
+  currentUser = await api.getCurrentUser();
   users = await api.getUsers();
   renderUsers();
 }
