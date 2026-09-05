@@ -2,6 +2,7 @@
 // Bootstrap 5 handles all visual styling. No custom CSS file is required.
 
 const api = window.ChatboxAPI;
+const githubData = window.ChatboxGitHubData;
 
 const sidebar = document.querySelector('[data-sidebar]');
 const themeButton = document.querySelector('[data-theme-toggle]');
@@ -19,6 +20,7 @@ let users = [];
 let currentUser = null;
 let activeConversation = null;
 let activeOtherUser = null;
+let sharedUsersLoading = false;
 
 function getSidebarInstance() {
   if (!sidebar || !window.bootstrap?.Offcanvas) return null;
@@ -53,6 +55,10 @@ searchInput?.addEventListener('input', () => {
   renderUsers(searchInput.value);
 });
 
+searchInput?.addEventListener('focus', () => {
+  refreshSharedUsers(false);
+});
+
 function emptyContactsMarkup(hasUsers) {
   return `
     <div class="border rounded-4 bg-body-tertiary p-4 text-center">
@@ -62,7 +68,7 @@ function emptyContactsMarkup(hasUsers) {
         </svg>
       </div>
       <p class="small fw-semibold mb-1">${hasUsers ? 'No matches' : 'No other users yet'}</p>
-      <p class="small text-body-secondary mb-0">${hasUsers ? 'Try another search.' : 'Register another practice user to start a chat.'}</p>
+      <p class="small text-body-secondary mb-0">${hasUsers ? 'Try another search.' : 'Shared GitHub registrations will appear here.'}</p>
     </div>
   `;
 }
@@ -102,13 +108,33 @@ function renderUsers(search = '') {
 
     const hint = document.createElement('small');
     hint.className = 'd-block text-truncate text-body-secondary mt-1';
-    hint.textContent = 'Tap to message';
+    hint.textContent = user.shared ? 'Shared GitHub user · Tap to message' : 'Tap to message';
 
     info.append(name, hint);
     button.append(avatar, info);
     button.addEventListener('click', () => openConversation(user));
     conversationList.appendChild(button);
   });
+}
+
+async function refreshSharedUsers(showErrors = false) {
+  if (sharedUsersLoading || !githubData || typeof githubData.getRegisteredUsers !== 'function') return;
+  sharedUsersLoading = true;
+
+  try {
+    const sharedUsers = await githubData.getRegisteredUsers();
+    if (typeof api.syncUsers === 'function') {
+      await api.syncUsers(sharedUsers);
+    }
+    users = await api.getUsers();
+    currentUser = await api.getCurrentUser();
+    renderUsers(searchInput?.value || '');
+  } catch (error) {
+    console.warn('CHATBOX shared users:', error);
+    if (showErrors) showError('Unable to refresh shared GitHub users right now.');
+  } finally {
+    sharedUsersLoading = false;
+  }
 }
 
 async function openConversation(user) {
@@ -239,10 +265,15 @@ messageInput?.addEventListener('keydown', (event) => {
   }
 });
 
-newChatButton?.addEventListener('click', () => {
+newChatButton?.addEventListener('click', async () => {
   searchInput?.focus();
   openSidebar();
+  await refreshSharedUsers(false);
   renderUsers();
+});
+
+window.addEventListener('focus', () => {
+  refreshSharedUsers(false);
 });
 
 function escapeText(value) {
@@ -270,6 +301,7 @@ async function boot() {
   currentUser = await api.getCurrentUser();
   users = await api.getUsers();
   renderUsers();
+  await refreshSharedUsers(false);
 }
 
 boot();
