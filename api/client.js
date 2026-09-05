@@ -4,6 +4,7 @@
   const DB_KEY = 'chatbox_mock_db_v1';
   const SESSION_KEY = 'chatbox_session_v1';
   const SEED_URL = 'database/seed.json';
+  const REMOVED_DEMO_IDS = new Set(['usr_alex', 'usr_jamie']);
   const PRACTICE_USER = {
     id: 'usr_practice',
     displayName: 'You',
@@ -14,11 +15,7 @@
   };
 
   const fallbackSeed = {
-    users: [
-      PRACTICE_USER,
-      { id: 'usr_alex', displayName: 'Alex', email: 'alex@chatbox.demo', passwordHash: null, demo: true, createdAt: '2026-09-05T00:00:00.000Z' },
-      { id: 'usr_jamie', displayName: 'Jamie', email: 'jamie@chatbox.demo', passwordHash: null, demo: true, createdAt: '2026-09-05T00:00:00.000Z' }
-    ],
+    users: [PRACTICE_USER],
     conversations: [],
     messages: []
   };
@@ -52,6 +49,19 @@
     return db;
   }
 
+  function removeLegacyDemoData(db) {
+    db.users = db.users.filter((user) => !REMOVED_DEMO_IDS.has(user.id));
+
+    const removedConversationIds = new Set(
+      db.conversations
+        .filter((item) => (item.memberIds || []).some((id) => REMOVED_DEMO_IDS.has(id)))
+        .map((item) => item.id)
+    );
+
+    db.conversations = db.conversations.filter((item) => !removedConversationIds.has(item.id));
+    db.messages = db.messages.filter((message) => !removedConversationIds.has(message.conversationId));
+  }
+
   async function init() {
     let db = readDb();
     if (!db) db = await loadSeed();
@@ -59,6 +69,8 @@
     db.users = Array.isArray(db.users) ? db.users : [];
     db.conversations = Array.isArray(db.conversations) ? db.conversations : [];
     db.messages = Array.isArray(db.messages) ? db.messages : [];
+
+    removeLegacyDemoData(db);
 
     if (!db.users.some((user) => user.id === PRACTICE_USER.id)) {
       db.users.unshift(clone(PRACTICE_USER));
@@ -87,7 +99,11 @@
   async function getOrCreateDirectConversation(otherUserId) {
     const db = await init();
     const me = currentUserId();
+    if (!otherUserId) throw new Error('Select a user first.');
     if (me === otherUserId) throw new Error('You cannot start a private chat with yourself.');
+
+    const otherUser = db.users.find((user) => user.id === otherUserId);
+    if (!otherUser) throw new Error('User not found.');
 
     let conversation = db.conversations.find((item) => {
       const members = item.memberIds || [];
