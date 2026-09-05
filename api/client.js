@@ -39,7 +39,7 @@
 
   async function loadSeed() {
     try {
-      const response = await fetch(`${SEED_URL}?v=20260905-2`, { cache: 'no-store' });
+      const response = await fetch(`${SEED_URL}?v=20260905-3`, { cache: 'no-store' });
       if (!response.ok) throw new Error('Seed unavailable');
       const data = await response.json();
       return {
@@ -114,7 +114,13 @@
     }
 
     writeDb(db);
-    localStorage.setItem(SESSION_KEY, PRACTICE_USER.id);
+
+    const savedSession = localStorage.getItem(SESSION_KEY);
+    const sessionIsValid = savedSession && db.users.some((user) => user.id === savedSession);
+    if (!sessionIsValid) {
+      localStorage.setItem(SESSION_KEY, PRACTICE_USER.id);
+    }
+
     return clone(db);
   }
 
@@ -145,7 +151,10 @@
     }
 
     const duplicate = db.users.find((user) => normalizeEmail(user.email) === normalizedEmail);
-    if (duplicate) throw new Error('That email is already registered on this browser.');
+    if (duplicate && duplicate.id !== PRACTICE_USER.id) {
+      localStorage.setItem(SESSION_KEY, duplicate.id);
+      return clone(duplicate);
+    }
 
     const user = {
       id: makeId('usr'),
@@ -157,7 +166,14 @@
 
     db.users.push(user);
     writeDb(db);
+    localStorage.setItem(SESSION_KEY, user.id);
     return clone(user);
+  }
+
+  async function usePracticeUser() {
+    await init();
+    localStorage.setItem(SESSION_KEY, PRACTICE_USER.id);
+    return clone(PRACTICE_USER);
   }
 
   async function getOrCreateDirectConversation(otherUserId) {
@@ -254,6 +270,7 @@
   window.ChatboxAPI = {
     init,
     registerUser,
+    usePracticeUser,
     getCurrentUser,
     getUsers,
     getConversations,
