@@ -40,7 +40,7 @@
 
   async function loadSeed() {
     try {
-      const response = await fetch(`${SEED_URL}?v=20260905-4`, { cache: 'no-store' });
+      const response = await fetch(`${SEED_URL}?v=20260905-5`, { cache: 'no-store' });
       if (!response.ok) throw new Error('Seed unavailable');
       const data = await response.json();
       return {
@@ -80,19 +80,19 @@
     db.messages = db.messages.filter((message) => !removedConversationIds.has(message.conversationId));
   }
 
-  function mergeSeedUsers(db, seed) {
-    seed.users.forEach((seedUser) => {
-      if (!seedUser?.id || REMOVED_DEMO_IDS.has(seedUser.id)) return;
+  function mergeUsers(db, incomingUsers) {
+    (incomingUsers || []).forEach((incoming) => {
+      if (!incoming?.id || REMOVED_DEMO_IDS.has(incoming.id)) return;
 
-      const existingIndex = db.users.findIndex((user) =>
-        user.id === seedUser.id ||
-        (seedUser.email && normalizeEmail(user.email) === normalizeEmail(seedUser.email))
-      );
-
-      if (existingIndex === -1) {
-        db.users.push(clone(seedUser));
-      } else if (seedUser.id === PRACTICE_USER.id) {
-        db.users[existingIndex] = { ...db.users[existingIndex], ...clone(PRACTICE_USER) };
+      const index = db.users.findIndex((user) => user.id === incoming.id);
+      if (index === -1) {
+        db.users.push(clone(incoming));
+      } else {
+        db.users[index] = {
+          ...db.users[index],
+          ...clone(incoming),
+          email: incoming.email || db.users[index].email || ''
+        };
       }
     });
   }
@@ -108,10 +108,13 @@
     db.messages = Array.isArray(db.messages) ? db.messages : [];
 
     removeLegacyDemoData(db);
-    mergeSeedUsers(db, seed);
+    mergeUsers(db, seed.users);
 
-    if (!db.users.some((user) => user.id === PRACTICE_USER.id)) {
+    const ownerIndex = db.users.findIndex((user) => user.id === PRACTICE_USER.id);
+    if (ownerIndex === -1) {
       db.users.unshift(clone(PRACTICE_USER));
+    } else {
+      db.users[ownerIndex] = { ...db.users[ownerIndex], ...clone(PRACTICE_USER) };
     }
 
     writeDb(db);
@@ -137,6 +140,13 @@
 
   async function getUsers() {
     const db = await init();
+    return db.users.map(clone);
+  }
+
+  async function syncUsers(sharedUsers) {
+    const db = await init();
+    mergeUsers(db, Array.isArray(sharedUsers) ? sharedUsers : []);
+    writeDb(db);
     return db.users.map(clone);
   }
 
@@ -186,7 +196,7 @@
     if (me === otherUserId) throw new Error('You cannot start a private chat with yourself.');
 
     const otherUser = db.users.find((user) => user.id === otherUserId);
-    if (!otherUser) throw new Error('User not found.');
+    if (!otherUser) throw new Error('User not found. Refresh the shared user list.');
 
     let conversation = db.conversations.find((item) => {
       const members = item.memberIds || [];
@@ -272,6 +282,7 @@
   window.ChatboxAPI = {
     init,
     registerUser,
+    syncUsers,
     usePracticeUser,
     getCurrentUser,
     getUsers,
